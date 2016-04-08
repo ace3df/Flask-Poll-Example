@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>{% block title %} {% endblock %} - Ace Bot</title>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='materialize.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='share-button.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      {% block body %}{% endblock %}
+    </div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='Chart.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='share-button.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.validate.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.form.min.js') }}"></script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    {% for message in get_flashed_messages() %}
+      <script type="text/javascript">
+          Materialize.toast("{{ message }}", 10000);
+      </script>
+    {% endfor %}
+    {% block js %}{% endblock %}
+  </body>
+</html>

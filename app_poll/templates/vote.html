@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Voting on {{ poll.question_text }}{% endblock %}
+{% block body %}
+<h4>{{ poll.question_text }}</h4>
+<div class="row">
+    <form action="" method="post">
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        {% for choice in poll.choices %}
+            <p>
+              <input type="checkbox" name="{{ choice.choice_text }}" id="{{ choice.choice_text }}" />
+              <label for="{{ choice.choice_text }}">{{ choice.choice_text }}</label>
+            </p>
+        {% endfor %}
+        <button class="waves-effect waves-light btn">Submit</button>
+        <a class="waves-effect waves-light btn" href="/results/{{ poll.url_str }}">Results</a>
+        <br /><br />
+        {% if poll.use_captcha %}
+             {{ recaptcha }}
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
+{% block js %}
+{% if not poll.allow_multi_choice %}
+    <script type="text/javascript">
+        $('input').on('change', function() {
+            $('input').not(this).prop('checked', false);  
+        });
+    </script>
+{% endif %}
+{% endblock %}

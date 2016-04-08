@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}List of Public Polls{% endblock %}
+
+{% block body %}
+
+<div class="row">
+    <div class="col s6">
+        <ul class="collection">
+        {% for poll in polls.items() %}
+            <a class="collection-item" href="/results/{{ poll[0] }}" >{{ poll[1]['Question Text'] }}</a>
+            <a name="view" href="/results/{{ poll[0] }}" class="waves-effect waves-light btn"><i class="material-icons left">visibility</i>View Results of Poll</a>
+            <a name="vote" href="/vote/{{ poll[0] }}" class="waves-effect waves-light btn"><i class="material-icons left">thumb_up</i>Vote on this Poll</a>
+            <br>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+{% endblock %}

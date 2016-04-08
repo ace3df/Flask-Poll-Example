@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block title %}Results for {{ poll.question_text }}{% endblock %}
+{% block body %}
+<h4>{{ poll.question_text }}</h4>
+<div class="row">
+    <div class="col s4">
+        <ul class="collection" id="pollResults">
+        {% for choice in result_json['Choices'].items() %}
+            <a name="option" class="collection-item">{{ choice[0] }}
+                <a name="{{ choice[1]['Choice Slug'] }}" class="waves-effect waves-light btn" style="width: 100%;">{{ choice[1]['Votes'] }}</a>
+            </a>
+        {% endfor %}
+        </ul>
+        <h5 name="totalVotes">Total Votes:</h5>
+        <center>
+        <share-button></share-button>
+        <p>
+            Poll Vote URL:<br />
+            <label style="font-size: 20px;">{{ domain }}vote/{{ poll.url_str }}</label>
+        </p>
+        </center>
+    </div>
+    <div class="col s8">
+            <div class="row">
+                <div class="col s12">
+                  <ul class="tabs">
+                    <li class="tab col s3"><a class="active" href="#barchart">Bar Chart</a></li>
+                    <li class="tab col s3"><a href="#piechart">Pie Chart </a></li>
+                    <li class="tab col s3"><a href="#polarchart">Polar Area Chart</a></li>
+                  </ul>
+                </div>
+                <div id="barchart" class="col s12">
+                    <center>
+                        <canvas id="barcanvas" height="400" width="400"></canvas>
+                    </center>
+                </div>
+                <div id="piechart" class="col s12">
+                    <center>
+                        <canvas id="piecanvas" height="400" width="400"></canvas>
+                    </center>    
+                </div>
+                <div id="polarchart" class="col s12">
+                    <center>
+                        <canvas id="polarcanvas" height="400" width="400"></canvas>
+                    </center>
+                </div>
+            </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+    var labels = [];
+    var result = [];
+    var count = 0;
+    var pieData = [];
+    String.prototype.trunc = String.prototype.trunc ||
+          function(n){
+              return (this.length > n) ? this.substr(0,n-1)+'...' : this;
+          };
+
+    function startResults(){
+        $.getJSON("/api/results/{{ poll.url_str }}", function(data) {
+            $.each(data, function(key, val) {
+
+                if(key=="Choices"){
+                    jQuery.each(val, function(c_name, c_meta) {
+                        labels.push(c_name.trunc(25));
+                        result.push(c_meta['Votes']);
+                        pieData.push({'value': c_meta['Votes'], 'label': c_name.trunc(25)})
+                        count += parseInt(c_meta['Votes']);
+                        $("h5[name=totalVotes]").text("Total Votes: " + count);
+                    });
+                };
+            });
+            var tempData = {
+            labels : labels,
+            datasets : [{
+                fillColor : "rgba(172,194,132,0.4)",
+                strokeColor : "#ACC26D",
+                pointColor : "#fff",
+                pointStrokeColor : "#9DB86D",
+                data : result
+                }]
+            }
+            var barctx = document.getElementById("barcanvas").getContext("2d");
+            window.myBar = new Chart(barctx).Bar(tempData, {
+                    responsive: true,
+                    maintainAspectRatio: false
+            });
+            var piectx = document.getElementById("piecanvas").getContext("2d");
+            window.myPie = new Chart(piectx).Pie(pieData, {
+                    animateScale: true
+            });
+            var polctx = document.getElementById("polarcanvas").getContext("2d");
+            window.myPol = new Chart(polctx).PolarArea(pieData, {
+                    animateScale: true
+            });
+
+        });
+    };
+
+    function updateResults(){
+        $.getJSON("/api/results/{{ poll.url_str }}", function(data) {
+            i = 0;
+            count = 0;
+            $.each(data, function(key, val) {
+                if(key=="Choices"){
+                    jQuery.each(val, function(c_name, c_meta) {
+                        myBar.datasets[0].bars[i].value = c_meta['Votes'];
+                        myPie.segments[i].value = c_meta['Votes'];
+                        myPol.segments[i].value = c_meta['Votes'];
+                        i++;
+                        count += parseInt(c_meta['Votes']);
+                        $("a[name=" + c_meta['Choice Slug'] + "]").text(c_meta['Votes']);
+                        $("h5[name=totalVotes]").text("Total Votes: " + count);
+                    });
+                };
+            });
+        });
+        myBar.update();
+    };
+
+    window.onload = function(){
+        config = {
+            url: "{{ domain }}vote/{{ poll.url_str }}",
+            title: "Vote now on my poll: {{ poll.question_text }}!",
+            description: "Vote now on my poll: {{ poll.question_text }}!",
+            ui: {
+                flyout: "bottom center"
+            },
+        }
+        var share = new ShareButton(config);
+        startResults();
+        setInterval(function(){
+            updateResults()
+            myBar.update();
+        }, 3000);
+    };
+
+</script>
+{% endblock %}

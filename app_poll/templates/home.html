@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+{% block title %}Create Poll!{% endblock %}
+{% block body %}
+<h3>Create a Poll!</h3>
+<div class="row">
+    <form action="" id="pollForm" method="post">
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        <p>
+            <label for="question_text">Question:</label>
+            <input placeholder="Enter your question here!" name="question_text" type="text">
+        </p>
+        <div class="options">
+            <label>Poll Options:</label>
+            <div class="row">
+                <p>
+                    <a name="add_row" class="waves-effect waves-light btn" style="background-color: #57A626"><i class="material-icons left">add</i>Row</a>
+                    <a name="remove_row" class="waves-effect waves-light btn" style="background-color: #A62626"><i class="material-icons left">delete</i>Row</a>
+                </p>
+            </div>
+            <div class="row">
+                <p class="col s4">
+                    <input placeholder="Enter a poll option here!" name="option_text_one" type="text">
+                </p>
+                <p class="col s4">
+                    <input placeholder="Enter a poll option here!" name="option_text_two" type="text">
+                </p>
+                <p class="col s4">
+                    <input placeholder="Enter a poll option here!" name="option_text" type="text">
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <p class="col s4">
+                <input type="checkbox" name="allow_multi_choice" id="allow_multi_choice">
+                <label for="allow_multi_choice">Allow people to select multiple choices</label>
+                <a class="tooltipped" data-position="right" data-delay="50" data-tooltip="Allow a voter to select multiple choices.">
+                    <i class="Tiny material-icons">live_help</i>
+                </a>
+            </p>
+            <p class="col s4">
+                <input type="checkbox" name="allow_same_user" id="allow_same_user">
+                <label for="allow_same_user">Allow same person to answer again</label>
+                <a class="tooltipped" data-position="right" data-delay="50" data-tooltip="A voter can come back and vote again.">
+                    <i class="Tiny material-icons">live_help</i>
+                </a>
+            </p>
+            <p class="col s4">
+                <input type="checkbox" checked="checked" name="use_captcha" id="use_captcha">
+                <label for="use_captcha">Force Captcha</label>
+                <a class="tooltipped" data-position="right" data-delay="50" data-tooltip="Voter will have to follow a captcha before voting.">
+                    <i class="Tiny material-icons">live_help</i>
+                </a>
+            </p>
+            <p class="col s4">
+                <input type="checkbox" name="public_form" id="public_form">
+                <label for="public_form">Public Form</label>
+                <a class="tooltipped" data-position="right" data-delay="50" data-tooltip="Your form will be listed publicly for others to easily find and vote.">
+                    <i class="Tiny material-icons">live_help</i>
+                </a>
+            </p>
+        </div>
+        <div class="row">
+            <p class="col s4">
+                <button class="waves-effect waves-light btn">Create Poll!</button>
+            </p>
+            <p class="col s8">
+                 {{ recaptcha }}
+            </p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block js %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#pollForm').validate({ // initialize the plugin
+
+            rules: {
+                question_text: {
+                    required: true,
+                    minlength: 1,
+                    maxlength: 180
+                },
+                option_text_one: {
+                    required: true,
+                    minlength: 1,
+                    maxlength: 200
+                },
+                option_text_two: {
+                    required: true,
+                    minlength: 1,
+                    maxlength: 200
+                }
+            },
+            messages: {
+                name: {
+                    required: "You need to enter a question!",
+                    minlength: jQuery.validator.format("At least {0} characters required!"),
+                    maxlength: "Your question is too long!"
+                }
+            }
+        });
+
+    });
+</script>
+
+<script type="text/javascript">        
+    $("a[name='add_row']").on("click", function(){
+        total_count = $("input[name='option_text']").length - 1;
+        if(total_count <= 16) {
+            $("input[name='option_text']").eq(total_count).closest("p").after("<p class=\"col s4\"><input placeholder=\"Enter a poll option here!\" name=\"option_text\" type=\"text\"></p>");
+        }
+    });
+
+    $("a[name='remove_row']").on("click", function(){
+        total_count = $("input[name='option_text']").length - 1;
+        if(total_count >= 1) {
+            $("input[name='option_text']").eq(total_count).parent().remove();
+        }
+    });
+
+</script>
+{% endblock %}
